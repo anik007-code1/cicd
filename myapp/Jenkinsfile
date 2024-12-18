@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     stages {
-        stage{
-            steps{
+        stage("Install Jenkins") {
+            steps {
                 sh '''
                 echo "Installing Jenkins in the Server"
                 chmod +x jenkins.sh
@@ -12,8 +12,8 @@ pipeline {
             }
         }
 
-        stage{
-            steps{
+        stage("Install Docker") {
+            steps {
                 sh '''
                 echo "Installing Docker in the Server"
                 chmod +x docker.sh
@@ -25,7 +25,7 @@ pipeline {
         stage("Clone Code") {
             steps {
                 echo "Cloning the code"
-                git url: "https://github.com/anik007-code1/Django.git", branch: "origin/website"
+                git url: "https://github.com/anik007-code1/cicd.git", branch: "main"
             }
         }
 
@@ -40,18 +40,18 @@ pipeline {
             steps {
                 echo "Pushing the Docker image to Docker Hub"
                 withCredentials([usernamePassword(credentialsId: "dockerHub", passwordVariable: "dockerHubPass", usernameVariable: "dockerHubUser")]) {
-                    sh "docker tag anikhq ${env.dockerHubUser}/anikhq:latest"
-                    sh "docker push ${env.dockerHubUser}/anikhq:latest"
+                    sh "docker tag anikhq ${dockerHubUser}/anikhq:latest"
+                    sh "docker push ${dockerHubUser}/anikhq:latest"
                 }
             }
         }
 
-        stage{
-            steps{
-            echo "Deploying the container"
-            sh '''
-            docker run -d -p 8000:8000 anikhq:latest
-            '''
+        stage("Deploy Container") {
+            steps {
+                echo "Deploying the container"
+                sh '''
+                docker run -d -p 8000:8000 anikhq:latest
+                '''
             }
         }
     }
