@@ -2,12 +2,35 @@ pipeline {
     agent any
 
     stages {
+        stage("Checkout Code") {
+            steps {
+                git url: "https://github.com/anik007-code1/cicd.git", branch: "main"
+            }
+        }
+
+        stage("List Files") {
+            steps {
+                echo "Listing workspace files..."
+                sh "ls -la"
+            }
+        }
+
+        stage("Validate Files") {
+            steps {
+                script {
+                    if (!fileExists('jenkins.sh')) {
+                        error "File 'jenkins.sh' is missing in the workspace!"
+                    }
+                }
+            }
+        }
+
         stage("Install Jenkins") {
             steps {
                 sh '''
-                echo "Installing Jenkins in the Server"
+                echo "Installing Jenkins on the server"
                 chmod +x jenkins.sh
-                ./myapp/jenkins.sh
+                ./jenkins.sh
                 '''
             }
         }
@@ -15,9 +38,9 @@ pipeline {
         stage("Install Docker") {
             steps {
                 sh '''
-                echo "Installing Docker in the Server"
+                echo "Installing Docker on the server"
                 chmod +x docker.sh
-                ./myapp/docker.sh
+                ./docker.sh
                 '''
             }
         }
@@ -25,7 +48,7 @@ pipeline {
         stage("Clone Code") {
             steps {
                 echo "Cloning the code"
-                git url: "https://github.com/anik007-code1/cicd.git", branch: "main"
+                git url: "https://github.com/anik007-code1/Django.git", branch: "website"
             }
         }
 
