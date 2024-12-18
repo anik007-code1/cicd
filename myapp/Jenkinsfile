@@ -8,18 +8,25 @@ pipeline {
             }
         }
 
-        stage("List Files") {
+        stage("List Files in Root") {
             steps {
-                echo "Listing workspace files..."
+                echo "Listing files in the root directory..."
                 sh "ls -la"
+            }
+        }
+
+        stage("List Files in myapp") {
+            steps {
+                echo "Listing files in the 'myapp' directory..."
+                sh "ls -la myapp"
             }
         }
 
         stage("Validate Files") {
             steps {
                 script {
-                    if (!fileExists('jenkins.sh')) {
-                        error "File 'jenkins.sh' is missing in the workspace!"
+                    if (!fileExists('myapp/jenkins.sh')) {
+                        error "File 'jenkins.sh' is missing in the 'myapp' directory!"
                     }
                 }
             }
@@ -27,54 +34,66 @@ pipeline {
 
         stage("Install Jenkins") {
             steps {
-                sh '''
-                echo "Installing Jenkins on the server"
-                chmod +x jenkins.sh
-                ./jenkins.sh
-                '''
+                dir('myapp') { // Navigate to the myapp directory
+                    sh '''
+                    echo "Installing Jenkins on the server"
+                    chmod +x jenkins.sh
+                    ./jenkins.sh
+                    '''
+                }
             }
         }
 
         stage("Install Docker") {
             steps {
-                sh '''
-                echo "Installing Docker on the server"
-                chmod +x docker.sh
-                ./docker.sh
-                '''
+                dir('myapp') { // Navigate to the myapp directory
+                    sh '''
+                    echo "Installing Docker on the server"
+                    chmod +x docker.sh
+                    ./docker.sh
+                    '''
+                }
             }
         }
 
         stage("Clone Code") {
             steps {
-                echo "Cloning the code"
-                git url: "https://github.com/anik007-code1/Django.git", branch: "website"
+                dir('myapp') {
+                    echo "Cloning the code"
+                    git url: "https://github.com/anik007-code1/Django.git", branch: "website"
+                }
             }
         }
 
         stage("Build") {
             steps {
-                echo "Building the Docker image"
-                sh "docker build -t anikhq ."
+                dir('myapp') {
+                    echo "Building the Docker image"
+                    sh "docker build -t anikhq ."
+                }
             }
         }
 
         stage("Push to Docker Hub") {
             steps {
-                echo "Pushing the Docker image to Docker Hub"
-                withCredentials([usernamePassword(credentialsId: "dockerHub", passwordVariable: "dockerHubPass", usernameVariable: "dockerHubUser")]) {
-                    sh "docker tag anikhq ${dockerHubUser}/anikhq:latest"
-                    sh "docker push ${dockerHubUser}/anikhq:latest"
+                dir('myapp') {
+                    echo "Pushing the Docker image to Docker Hub"
+                    withCredentials([usernamePassword(credentialsId: "dockerHub", passwordVariable: "dockerHubPass", usernameVariable: "dockerHubUser")]) {
+                        sh "docker tag anikhq ${dockerHubUser}/anikhq:latest"
+                        sh "docker push ${dockerHubUser}/anikhq:latest"
+                    }
                 }
             }
         }
 
         stage("Deploy Container") {
             steps {
-                echo "Deploying the container"
-                sh '''
-                docker run -d -p 8000:8000 anikhq:latest
-                '''
+                dir('myapp') {
+                    echo "Deploying the container"
+                    sh '''
+                    docker run -d -p 8000:8000 anikhq:latest
+                    '''
+                }
             }
         }
     }
