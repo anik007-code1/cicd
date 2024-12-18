@@ -7,7 +7,7 @@ pipeline {
                 sh '''
                 echo "Installing Jenkins in the Server"
                 chmod +x jenkins.sh
-                ./jenkins.sh
+                ./myapp/jenkins.sh
                 '''
             }
         }
@@ -17,7 +17,7 @@ pipeline {
                 sh '''
                 echo "Installing Docker in the Server"
                 chmod +x docker.sh
-                ./docker.sh
+                ./myapp/docker.sh
                 '''
             }
         }
