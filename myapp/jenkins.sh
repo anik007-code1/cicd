@@ -9,9 +9,9 @@ sudo wget -O /usr/share/keyrings/jenkins-keyring.asc https://pkg.jenkins.io/debi
 
 echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian binary/ | sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null
 
-sudo apt-get update
-
-sudo apt-get install jenkins
+echo "Installing Jenkins and dependencies..."
+echo "123" | sudo -S apt-get update -y
+echo "123" | sudo -S apt-get install -y jenkins
 
 sudo systemctl enable jenkins
 
